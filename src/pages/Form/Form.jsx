@@ -6,17 +6,20 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
-import { makeStyles } from '@material-ui/core/styles';
-
+import PeerMap from '../../assets/peer-map.png';
 
 import Asis from '../../assets/secure-data-grey.svg';
 import AsisActive from '../../assets/secure-data.svg';
+
 import TLS12 from '../../assets/cyber-security-grey.svg';
 import TLS12Active from '../../assets/cyber-security.svg';
+
 import TLS13 from '../../assets/data-encryption-grey.svg';
 import TLS13Active from '../../assets/data-encryption.svg';
+import { StyledCard } from './Form.styled'
+import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles({
     root: {
         flexGrow: 1,
     },
@@ -25,7 +28,8 @@ const useStyles = makeStyles(() => ({
         boxShadow: '0 2px 4px 2px rgba(0,0,0,0.06)'
     },
     title: {
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginTop: '16px'
     },
     alignCenter: {
         textAlign: 'center'
@@ -37,6 +41,13 @@ const useStyles = makeStyles(() => ({
         boxShadow: '0 2px 4px 0 rgba(0,0,0,0.2)',
         margin: '0px 16px',
         width: '100%'
+    },
+    group: props => ({
+        backgroundColor: props.activeColor ? '#DFA24A' : '#FFFFFF',
+    }),
+    activeGrid: {
+        border: '1px solid #DFA24A',
+        backgroundColor: '#FFF7ED'
     },
     logo: {
         width: '106px',
@@ -56,15 +67,26 @@ const useStyles = makeStyles(() => ({
         fontWeight: '300',
         letterSpacing: '0',
         lineHeight: '18px',
+    },
+    peerImg: {
+        width: '400px',
+        height: '400px'
+    },
+    spacingTop: {
+        marginTop: '16px'
     }
-}));
+});
 
 const Form = () => {
-    const classes = useStyles();
+    const styleProps = {
+        activeColor: false
+    };
+    const classes = useStyles(styleProps);
 
     const [asisIcon, setAsisIcon] = useState(Asis);
     const [tlsOneTwoIcon, setTlsOneTwoIcon] = useState(TLS12);
     const [tlsOneThreeIcon, setTlsOneThreeIcon] = useState(TLS13);
+    
     const [version, setVersion] = useState(null);
     const [ellipticalParam, setEllipticalParam] = useState(null);
 
@@ -74,7 +96,8 @@ const Form = () => {
             displayName: 'AS - IS',
             iconId: `${asisIcon}`,
             position: 0,
-            hasChild: false
+            hasChild: false,
+            isActive: false
         },
         {
             id: 'tls12',
@@ -82,6 +105,7 @@ const Form = () => {
             iconId: `${tlsOneTwoIcon}`,
             position: 1,
             hasChild: true,
+            isActive: false
         },
         {
             id: 'tls13',
@@ -89,12 +113,46 @@ const Form = () => {
             iconId: `${tlsOneThreeIcon}`,
             position: 2,
             hasChild: true,
+            isActive: false
         }
     ];
 
-    const ellipticalData = ['secp256r1(0x0017)', 'secp384r1(0X0018)', 'secp521r1(0X0019)', 'X25519(0X001D)', 'X448(0X001E)'];
+    const ellipticalData = [
+        {
+            tlsAlg: 'ECDH',
+            tlsAlgName: 'secp256r1',
+            tlsAlgPrefix: 'Curve 1',
+            tlsAlgSuffix: '(0x0017)'
+        },
+        {
+            tlsAlg: 'ECDH',
+            tlsAlgName: 'secp384r1',
+            tlsAlgPrefix: 'Curve 2',
+            tlsAlgSuffix: '(0X0018)'
+        },
+        {
+            tlsAlg: 'ECDH',
+            tlsAlgName: 'secp521r1',
+            tlsAlgPrefix: 'Curve 3',
+            tlsAlgSuffix: '(0X0019)'
+        },
+        {
+            tlsAlg: 'XDH',
+            tlsAlgName: 'x25519',
+            tlsAlgPrefix: 'Curve 4',
+            tlsAlgSuffix: '(0X001D)'
+        },
+        {
+            tlsAlg: 'XDH',
+            tlsAlgName: 'x448',
+            tlsAlgPrefix: 'Curve 5',
+            tlsAlgSuffix: '(0X001E)'
+        }
+    ];
 
     const handleTLS = (selectedVersion) => {
+        tlsMasterData.find(data => data.id == selectedVersion.id).isActive = true;
+        console.log(tlsMasterData)
         const { id } = selectedVersion;
         if (id === 'asis') {
             setTlsOneTwoIcon(TLS12);
@@ -109,6 +167,7 @@ const Form = () => {
             setTlsOneTwoIcon(TLS12);
             setTlsOneThreeIcon(TLS13Active);
         }
+        setEllipticalParam(null)
         setVersion(selectedVersion);
     }
 
@@ -116,8 +175,8 @@ const Form = () => {
         return tlsMasterData.map((data) => {
             return (
                 <Grid item xs={3} key={data.id} onClick={() => handleTLS(data)}>
-                    <Card>
-                        <CardContent className={classes.alignCenter} >
+                    <StyledCard activecard={data.isActive}>
+                        <CardContent className={classes.alignCenter}>
                             <Grid item xs={12}>
                                 <img className={classes.img} alt="complex" src={data.iconId} />
                             </Grid>
@@ -125,7 +184,7 @@ const Form = () => {
                                 <span className={classes.spanText}>{data.displayName}</span>
                             </Grid>
                         </CardContent>
-                    </Card>
+                    </StyledCard>
                 </Grid>
             )
         })
@@ -134,11 +193,11 @@ const Form = () => {
     const renderEllipticalParam = () => {
         return ellipticalData.map((data) => {
             return (
-                <Grid item xs={2} key={data} onClick={() => setEllipticalParam(data)}>
-                    <Card>
+                <Grid item xs={2} key={data.tlsAlgName} onClick={() => setEllipticalParam(data)}>
+                    <Card className={classes.group}>
                         <CardContent className={classes.alignCenter} >
                             <Grid item xs={12}>
-                                <span className={classes.spanText1}>Curve - {data}</span>
+                                <span className={classes.spanText1}>{data.tlsAlgPrefix} - {data.tlsAlgName}{data.tlsAlgSuffix}</span>
                             </Grid>
                         </CardContent>
                     </Card>
@@ -156,25 +215,24 @@ const Form = () => {
     const submitData = () => {
         const payload = {
             version: version.id,
-            ellipticalParam: ellipticalParam
+            tlsAlg: ellipticalParam.tlsAlg,
+            tlsAlgName: ellipticalParam.tlsAlgName
         }
-        const data = fetch('https://jsonplaceholder.typicode.com/todos/1', {
+
+        const data = fetch('https://23.101.26.26:8080/api/v1/tls-config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
-        })
-            .then((response) => {
-                console.log("response - ", response.status);
-                if(response.status === 201) {
-                    showAlert();
-                }
-                return response.json();
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+        }).then((response) => {
+            if (response.status === 201) {
+                showAlert();
+            }
+            return response.json();
+        }).catch((error) => {
+            console.error(error);
+        });
         return data;
     }
 
@@ -184,7 +242,15 @@ const Form = () => {
                 {/* COMPONENT - Select TLS Version */}
                 <CardContent>
                     <Grid container spacing={3}>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} className={classes.spacingTop}>
+                            <Typography gutterBottom variant="subtitle2">
+                                Peer map
+                            </Typography>
+                        </Grid>
+                        <img className={classes.peerImg} alt="complex" src={PeerMap} />
+                    </Grid>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} className={classes.spacingTop}>
                             <Typography gutterBottom variant="subtitle2">
                                 Select TLS Version
                             </Typography>
@@ -193,7 +259,7 @@ const Form = () => {
                     </Grid>
                     {version?.hasChild &&
                         <Grid container spacing={3}>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} className={classes.spacingTop}>
                                 <Typography gutterBottom variant="subtitle2">
                                     Select Elliptic Curve Parameter
                           </Typography>
