@@ -108,6 +108,7 @@ module.exports = function (_env, argv) {
         },
         devServer: {
             compress: true,
+            port: 8090,
             historyApiFallback: true,
             open: true,
             overlay: true
