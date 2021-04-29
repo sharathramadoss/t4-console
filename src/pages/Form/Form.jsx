@@ -3,7 +3,6 @@ import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import PeerMap from '../../assets/peer-map.png';
@@ -74,6 +73,26 @@ const useStyles = makeStyles({
     },
     spacingTop: {
         marginTop: '16px'
+    },
+    heading: {
+        fontSize: '15px',
+        letterSpacing: '0',
+        lineHeight: '18px'
+    },
+    saveButton: {
+        background: '#DFA24A',
+        fontSize: '15px',
+        letterSpacing: '0',
+        lineHeight: '18px',
+        fontWeight: '300',
+        width: '90px',
+        height: '35px'
+    },
+    cancelButton: {
+        border: '1px solid #DFA24A',
+        fontWeight: '300',
+        width: '90px',
+        height: '35px'
     }
 });
 
@@ -86,34 +105,30 @@ const Form = () => {
     const [asisIcon, setAsisIcon] = useState(Asis);
     const [tlsOneTwoIcon, setTlsOneTwoIcon] = useState(TLS12);
     const [tlsOneThreeIcon, setTlsOneThreeIcon] = useState(TLS13);
-    
     const [version, setVersion] = useState(null);
     const [ellipticalParam, setEllipticalParam] = useState(null);
 
     const tlsMasterData = [
         {
-            id: 'asis',
+            id: 'as-is',
             displayName: 'AS - IS',
             iconId: `${asisIcon}`,
             position: 0,
-            hasChild: false,
-            isActive: false
+            hasChild: false
         },
         {
             id: 'tls12',
             displayName: 'TLS 1.2',
             iconId: `${tlsOneTwoIcon}`,
             position: 1,
-            hasChild: true,
-            isActive: false
+            hasChild: true
         },
         {
             id: 'tls13',
             displayName: 'TLS 1.3',
             iconId: `${tlsOneThreeIcon}`,
             position: 2,
-            hasChild: true,
-            isActive: false
+            hasChild: true
         }
     ];
 
@@ -152,9 +167,9 @@ const Form = () => {
 
     const handleTLS = (selectedVersion) => {
         tlsMasterData.find(data => data.id == selectedVersion.id).isActive = true;
-        console.log(tlsMasterData)
+
         const { id } = selectedVersion;
-        if (id === 'asis') {
+        if (id === 'as-is') {
             setTlsOneTwoIcon(TLS12);
             setTlsOneThreeIcon(TLS13);
             setAsisIcon(AsisActive);
@@ -175,7 +190,7 @@ const Form = () => {
         return tlsMasterData.map((data) => {
             return (
                 <Grid item xs={3} key={data.id} onClick={() => handleTLS(data)}>
-                    <StyledCard activecard={data.isActive}>
+                    <StyledCard activecard={data.id === version?.id}>
                         <CardContent className={classes.alignCenter}>
                             <Grid item xs={12}>
                                 <img className={classes.img} alt="complex" src={data.iconId} />
@@ -194,13 +209,13 @@ const Form = () => {
         return ellipticalData.map((data) => {
             return (
                 <Grid item xs={2} key={data.tlsAlgName} onClick={() => setEllipticalParam(data)}>
-                    <Card className={classes.group}>
+                    <StyledCard activecard={data.tlsAlgName === ellipticalParam?.tlsAlgName}>
                         <CardContent className={classes.alignCenter} >
                             <Grid item xs={12}>
                                 <span className={classes.spanText1}>{data.tlsAlgPrefix} - {data.tlsAlgName}{data.tlsAlgSuffix}</span>
                             </Grid>
                         </CardContent>
-                    </Card>
+                    </StyledCard>
                 </Grid>
             )
         })
@@ -214,9 +229,9 @@ const Form = () => {
 
     const submitData = () => {
         const payload = {
-            version: version.id,
-            tlsAlg: ellipticalParam.tlsAlg,
-            tlsAlgName: ellipticalParam.tlsAlgName
+            version: version?.id,
+            tlsAlg: ellipticalParam?.tlsAlg,
+            tlsAlgName: ellipticalParam?.tlsAlgName
         }
 
         const data = fetch('https://23.101.26.26:8080/api/v1/tls-config', {
@@ -236,6 +251,14 @@ const Form = () => {
         return data;
     }
 
+    const cancelData = () => {
+        setEllipticalParam(null);
+        setAsisIcon(Asis);
+        setTlsOneTwoIcon(TLS12);
+        setTlsOneThreeIcon(TLS13);
+        setVersion(null);
+    }
+
     return (
         <Grid container className={classes.body} spacing={2}>
             <Card className={classes.content}>
@@ -243,26 +266,26 @@ const Form = () => {
                 <CardContent>
                     <Grid container spacing={3}>
                         <Grid item xs={12} className={classes.spacingTop}>
-                            <Typography gutterBottom variant="subtitle2">
-                                Peer map
-                            </Typography>
+                            <span className={classes.heading}>
+                                Peer Map
+                            </span>
                         </Grid>
                         <img className={classes.peerImg} alt="complex" src={PeerMap} />
                     </Grid>
                     <Grid container spacing={3}>
                         <Grid item xs={12} className={classes.spacingTop}>
-                            <Typography gutterBottom variant="subtitle2">
+                            <span className={classes.heading}>
                                 Select TLS Version
-                            </Typography>
+                            </span>
                         </Grid>
                         {renderTLSMaster()}
                     </Grid>
                     {version?.hasChild &&
                         <Grid container spacing={3}>
                             <Grid item xs={12} className={classes.spacingTop}>
-                                <Typography gutterBottom variant="subtitle2">
+                                <span className={classes.heading}>
                                     Select Elliptic Curve Parameter
-                          </Typography>
+                                </span>
                             </Grid>
                             {renderEllipticalParam()}
                         </Grid>
@@ -270,8 +293,8 @@ const Form = () => {
                 </CardContent>
                 {/* COMPONENT - CONTENT FOOTER */}
                 <CardActions className={classes.title}>
-                    <Button variant="contained">Cancel</Button>
-                    <Button variant="contained" color="primary" onClick={() => { submitData() }}>
+                    <Button variant="outlined" className={classes.cancelButton} onClick={() => { cancelData() }}>Cancel</Button>
+                    <Button variant="contained" className={classes.saveButton} onClick={() => { submitData() }}>
                         Save
                     </Button>
                 </CardActions>
