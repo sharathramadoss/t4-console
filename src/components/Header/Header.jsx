@@ -10,15 +10,18 @@ const useStyles = makeStyles(() => ({
         boxShadow: '0 2px 4px 2px rgba(0,0,0,0.06)'
     },
     title: {
-        justifyContent: 'center'
+        paddingTop: '16px !important',
+        paddingLeft: '16px !important',
+        justifyContent: 'space-around'
     },
     logo: {
         width: '106px',
         height: '48px'
     },
     spanTitle: {
-        fontSize: '20px',
-        fontWeight: 'bold'
+        fontSize: '30px',
+        fontWeight: '400',
+        color: '#DFA24A'
     }
 }));
 
