@@ -84,6 +84,9 @@ const useStyles = makeStyles({
         fontWeight: '300',
         width: '90px',
         height: '35px'
+    },
+    align: {
+        textAlign: 'center'
     }
 });
 
@@ -266,7 +269,9 @@ const Form = () => {
                                 Peer Map
                             </span>
                         </Grid>
-                        <img alt="complex" src={PeerMap} />
+                        <Grid item xs={12} className={classes.align}>
+                            <img alt="complex" src={PeerMap} />
+                        </Grid>
                     </Grid>
                     <Grid container spacing={3}>
                         <Grid item xs={12} className={classes.spacingTop}>
