@@ -5,6 +5,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar';
 import PeerMap from '../../assets/peer-map.png';
 import Asis from '../../assets/secure-data-grey.svg';
 import AsisActive from '../../assets/secure-data.svg';
@@ -96,6 +97,7 @@ const Form = () => {
     const [asisIcon, setAsisIcon] = useState(Asis);
     const [tlsOneTwoIcon, setTlsOneTwoIcon] = useState(TLS12);
     const [tlsOneThreeIcon, setTlsOneThreeIcon] = useState(TLS13);
+    const [enableSave, setEnableSave] = useState(false);
     const [version, setVersion] = useState(null);
     const [ellipticalParam, setEllipticalParam] = useState(null);
     const [status, setStatus] = useState(false);
@@ -166,17 +168,25 @@ const Form = () => {
             setTlsOneTwoIcon(TLS12);
             setTlsOneThreeIcon(TLS13);
             setAsisIcon(AsisActive);
+            setEnableSave(true);
         } else if (id === 'tls12') {
             setAsisIcon(Asis);
             setTlsOneThreeIcon(TLS13);
             setTlsOneTwoIcon(TLS12Active);
+            setEnableSave(false);
         } else {
             setAsisIcon(Asis);
             setTlsOneTwoIcon(TLS12);
             setTlsOneThreeIcon(TLS13Active);
+            setEnableSave(false);
         }
         setEllipticalParam(null)
         setVersion(selectedVersion);
+    }
+
+    const handleEllipticalParam = (data) => {
+        setEllipticalParam(data);
+        setEnableSave(true);
     }
 
     const renderTLSMaster = () => {
@@ -201,7 +211,7 @@ const Form = () => {
     const renderEllipticalParam = () => {
         return ellipticalData.map((data) => {
             return (
-                <Grid item xs={2} key={data.tlsAlgName} onClick={() => setEllipticalParam(data)}>
+                <Grid item xs={2} key={data.tlsAlgName} onClick={() => handleEllipticalParam(data)}>
                     <StyledCard activecard={data.tlsAlgName === ellipticalParam?.tlsAlgName}>
                         <CardContent className={classes.alignCenter} >
                             <Grid item xs={12}>
@@ -214,9 +224,19 @@ const Form = () => {
         })
     }
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setStatus(false);
+    };
+
     const showAlert = () => {
         return (
-            <Alert severity="success">Data saved successfully!</Alert>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">Data saved successfully!</Alert>
+            </Snackbar>
         )
     }
 
@@ -255,6 +275,7 @@ const Form = () => {
         setTlsOneTwoIcon(TLS12);
         setTlsOneThreeIcon(TLS13);
         setVersion(null);
+        setEnableSave(false);
     }
 
     return (
@@ -295,7 +316,7 @@ const Form = () => {
                 {/* COMPONENT - CONTENT FOOTER */}
                 <CardActions className={classes.title}>
                     <Button variant="outlined" className={classes.cancelButton} onClick={() => { cancelData() }}>Cancel</Button>
-                    <Button variant="contained" className={classes.saveButton} onClick={() => { submitData() }}>
+                    <Button variant="contained" className={classes.saveButton} onClick={() => { submitData() }} disabled={!enableSave}>
                         Save
                     </Button>
                 </CardActions>
