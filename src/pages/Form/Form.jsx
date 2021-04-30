@@ -96,7 +96,7 @@ const Form = () => {
     const [version, setVersion] = useState(null);
     const [ellipticalParam, setEllipticalParam] = useState(null);
     const [status, setStatus] = useState(false);
-    const [loader, setLoader] = useState(false)
+    const [loader, setLoader] = useState(false);
 
     const tlsMasterData = [
         {
@@ -219,14 +219,14 @@ const Form = () => {
 
     const submitData = async () => {
         setLoader(true)
-        const data = "success";
+        const successResponse = "success";
         const payload = {
             version: version?.id,
             tlsAlg: ellipticalParam?.tlsAlg,
             tlsAlgName: ellipticalParam?.tlsAlgName
         }
 
-        const data = await fetch('https://23.101.26.26:8080/api/v1/tls-config', {
+        const data = await fetch('http://23.101.26.26:8888/api/v1/tls-config/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const Form = () => {
                 setStatus(true)
             }
             setLoader(false);
-            return data;
+            return successResponse;
         }).catch((error) => {
             setLoader(false);
             console.error(error);
