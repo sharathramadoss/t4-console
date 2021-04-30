@@ -6,15 +6,13 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import PeerMap from '../../assets/peer-map.png';
-
 import Asis from '../../assets/secure-data-grey.svg';
 import AsisActive from '../../assets/secure-data.svg';
-
 import TLS12 from '../../assets/cyber-security-grey.svg';
 import TLS12Active from '../../assets/cyber-security.svg';
-
 import TLS13 from '../../assets/data-encryption-grey.svg';
 import TLS13Active from '../../assets/data-encryption.svg';
+import { Loader } from 'simple-react-loader'
 import { StyledCard } from './Form.styled'
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -41,9 +39,6 @@ const useStyles = makeStyles({
         margin: '0px 16px',
         width: '100%'
     },
-    group: props => ({
-        backgroundColor: props.activeColor ? '#DFA24A' : '#FFFFFF',
-    }),
     activeGrid: {
         border: '1px solid #DFA24A',
         backgroundColor: '#FFF7ED'
@@ -66,10 +61,6 @@ const useStyles = makeStyles({
         fontWeight: '300',
         letterSpacing: '0',
         lineHeight: '18px',
-    },
-    peerImg: {
-        width: '400px',
-        height: '400px'
     },
     spacingTop: {
         marginTop: '16px'
@@ -97,16 +88,15 @@ const useStyles = makeStyles({
 });
 
 const Form = () => {
-    const styleProps = {
-        activeColor: false
-    };
-    const classes = useStyles(styleProps);
+    const classes = useStyles();
 
     const [asisIcon, setAsisIcon] = useState(Asis);
     const [tlsOneTwoIcon, setTlsOneTwoIcon] = useState(TLS12);
     const [tlsOneThreeIcon, setTlsOneThreeIcon] = useState(TLS13);
     const [version, setVersion] = useState(null);
     const [ellipticalParam, setEllipticalParam] = useState(null);
+    const [status, setStatus] = useState(false);
+    const [loader, setLoader] = useState(false)
 
     const tlsMasterData = [
         {
@@ -227,27 +217,32 @@ const Form = () => {
         )
     }
 
-    const submitData = () => {
+    const submitData = async () => {
+        setLoader(true)
+        const data = "success";
         const payload = {
             version: version?.id,
             tlsAlg: ellipticalParam?.tlsAlg,
             tlsAlgName: ellipticalParam?.tlsAlgName
         }
 
-        const data = fetch('https://23.101.26.26:8080/api/v1/tls-config', {
+        const data = await fetch('https://23.101.26.26:8080/api/v1/tls-config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
         }).then((response) => {
-            if (response.status === 201) {
-                showAlert();
+            if (response.status === 201 || response.status === 202) {
+                setStatus(true)
             }
-            return response.json();
+            setLoader(false);
+            return data;
         }).catch((error) => {
+            setLoader(false);
             console.error(error);
         });
+        setLoader(false);
         return data;
     }
 
@@ -261,6 +256,7 @@ const Form = () => {
 
     return (
         <Grid container className={classes.body} spacing={2}>
+            {loader && <Loader showLoader={loader} type="pulse" />}
             <Card className={classes.content}>
                 {/* COMPONENT - Select TLS Version */}
                 <CardContent>
@@ -270,7 +266,7 @@ const Form = () => {
                                 Peer Map
                             </span>
                         </Grid>
-                        <img className={classes.peerImg} alt="complex" src={PeerMap} />
+                        <img alt="complex" src={PeerMap} />
                     </Grid>
                     <Grid container spacing={3}>
                         <Grid item xs={12} className={classes.spacingTop}>
@@ -298,6 +294,7 @@ const Form = () => {
                         Save
                     </Button>
                 </CardActions>
+                {status && showAlert()}
             </Card>
         </Grid>
     );
