@@ -234,7 +234,7 @@ const Form = () => {
             tlsAlgName: ellipticalParam?.tlsAlgName
         }
 
-        const data = fetch('https://23.101.26.26:8080/api/v1/tls-config', {
+        const data = fetch('http://23.101.26.26:8888/api/v1/tls-config/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
